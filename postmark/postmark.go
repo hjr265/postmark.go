@@ -136,7 +136,7 @@ func (c *Client) endpoint(path string) *url.URL {
 	}
 
 	if c.Host == "" {
-		url.Host = HOST
+		url.Host = DefaultHost
 	} else {
 		url.Host = c.Host
 	}
