@@ -18,32 +18,36 @@ const (
 )
 
 type Message struct {
-	From        *mail.Address
-	To          []*mail.Address
-	Cc          []*mail.Address
-	Bcc         []*mail.Address
-	Subject     string
-	Tag         string
-	HtmlBody    io.Reader
-	TextBody    io.Reader
-	ReplyTo     *mail.Address
-	Headers     mail.Header
-	Attachments []Attachment
+	From          *mail.Address
+	To            []*mail.Address
+	Cc            []*mail.Address
+	Bcc           []*mail.Address
+	Subject       string
+	Tag           string
+	HtmlBody      io.Reader
+	TextBody      io.Reader
+	TemplateId    int
+	TemplateModel map[string]interface{}
+	ReplyTo       *mail.Address
+	Headers       mail.Header
+	Attachments   []Attachment
 }
 
 func (m *Message) MarshalJSON() ([]byte, error) {
 	doc := &struct {
-		From        string
-		To          string
-		Cc          string
-		Bcc         string
-		Subject     string
-		Tag         string
-		HtmlBody    string
-		TextBody    string
-		ReplyTo     string
-		Headers     []map[string]string
-		Attachments []Attachment `json:"omitempty"`
+		From          string
+		To            string
+		Cc            string
+		Bcc           string
+		Subject       string `json:",omitempty"`
+		Tag           string
+		HtmlBody      string `json:",omitempty"`
+		TextBody      string `json:",omitempty"`
+		TemplateId    int
+		TemplateModel map[string]interface{}
+		ReplyTo       string
+		Headers       []map[string]string
+		Attachments   []Attachment `json:"omitempty"`
 	}{}
 
 	doc.From = m.From.String()
@@ -78,6 +82,8 @@ func (m *Message) MarshalJSON() ([]byte, error) {
 		}
 		doc.TextBody = string(textBody)
 	}
+	doc.TemplateId = m.TemplateId
+	doc.TemplateModel = m.TemplateModel
 	if m.ReplyTo != nil {
 		doc.ReplyTo = m.ReplyTo.String()
 	}
@@ -154,7 +160,12 @@ func (c *Client) Send(msg *Message) (*Result, error) {
 		return nil, err
 	}
 
-	req, err := http.NewRequest("POST", c.endpoint("email").String(), &buf)
+	url := c.endpoint("email")
+	if msg.TemplateId != 0 {
+		url = c.endpoint("email/withTemplate")
+	}
+
+	req, err := http.NewRequest("POST", url.String(), &buf)
 	if err != nil {
 		return nil, err
 	}
