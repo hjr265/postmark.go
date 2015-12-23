@@ -43,7 +43,7 @@ func (m *Message) MarshalJSON() ([]byte, error) {
 		Tag           string
 		HtmlBody      string `json:",omitempty"`
 		TextBody      string `json:",omitempty"`
-		TemplateId    int
+		TemplateId    int    `json:",omitempty"`
 		TemplateModel map[string]interface{}
 		ReplyTo       string
 		Headers       []map[string]string
