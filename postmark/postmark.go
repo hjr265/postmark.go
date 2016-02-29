@@ -47,7 +47,7 @@ func (m *Message) MarshalJSON() ([]byte, error) {
 		TemplateModel map[string]interface{}
 		ReplyTo       string
 		Headers       []map[string]string
-		Attachments   []Attachment `json:"omitempty"`
+		Attachments   []Attachment `json:",omitempty"`
 	}{}
 
 	doc.From = m.From.String()
