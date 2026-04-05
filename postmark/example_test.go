@@ -2,31 +2,18 @@ package postmark_test
 
 import (
 	"fmt"
-	"net/mail"
-	"strings"
 
 	"github.com/hjr265/postmark.go/postmark"
 )
 
 func ExampleClient() {
-	c := postmark.Client{
-		ApiKey: "YOUR-API-KEY",
-		Secure: true,
-	}
+	c := postmark.New("YOUR-API-KEY")
 
-	res, err := c.Send(&postmark.Message{
-		From: &mail.Address{
-			Name:    "SENDER-NAME",
-			Address: "SENDER-EMAIL",
-		},
-		To: []*mail.Address{
-			{
-				Name:    "RECIPIENT NAME",
-				Address: "RECIPIENT EMAIL",
-			},
-		},
+	res, err := c.SendEmail(&postmark.EmailRequest{
+		From:     "SENDER-NAME <SENDER-EMAIL>",
+		To:       "RECIPIENT NAME <RECIPIENT EMAIL>",
 		Subject:  "SUBJECT",
-		TextBody: strings.NewReader("MESSAGE-BODY-AS-TEXT"),
+		TextBody: "MESSAGE-BODY-AS-TEXT",
 	})
 	if err != nil {
 		panic(err)

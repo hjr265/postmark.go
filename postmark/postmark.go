@@ -12,26 +12,39 @@ const (
 	DefaultHost = "api.postmarkapp.com"
 )
 
+// Option is a functional option for configuring a Client.
+type Option func(*Client)
+
+// WithHost sets a custom API host. If not set, DefaultHost is used.
+func WithHost(host string) Option {
+	return func(c *Client) {
+		c.host = host
+	}
+}
+
 // Client is a Postmark API client.
 type Client struct {
-	ApiKey string
-	Secure bool
+	apiKey string
+	host   string
+}
 
-	Host string // Host for the API endpoints, DefaultHost if ""
+// New creates a new Postmark API client with the given API key.
+func New(apiKey string, opts ...Option) *Client {
+	c := &Client{apiKey: apiKey}
+	for _, opt := range opts {
+		opt(c)
+	}
+	return c
 }
 
 func (c *Client) endpoint(path string) *url.URL {
 	url := &url.URL{}
-	if c.Secure {
-		url.Scheme = "https"
-	} else {
-		url.Scheme = "http"
-	}
+	url.Scheme = "https"
 
-	if c.Host == "" {
+	if c.host == "" {
 		url.Host = DefaultHost
 	} else {
-		url.Host = c.Host
+		url.Host = c.host
 	}
 
 	url.Path = path
@@ -54,7 +67,7 @@ func (c *Client) do(path string, body, result interface{}) error {
 	}
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("X-Postmark-Server-Token", c.ApiKey)
+	req.Header.Set("X-Postmark-Server-Token", c.apiKey)
 
 	resp, err := (&http.Client{}).Do(req)
 	if err != nil {
@@ -73,7 +86,7 @@ func (c *Client) get(path string, result interface{}) error {
 		return err
 	}
 	req.Header.Set("Accept", "application/json")
-	req.Header.Set("X-Postmark-Server-Token", c.ApiKey)
+	req.Header.Set("X-Postmark-Server-Token", c.apiKey)
 
 	resp, err := (&http.Client{}).Do(req)
 	if err != nil {
