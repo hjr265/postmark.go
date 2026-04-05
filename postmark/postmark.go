@@ -64,3 +64,22 @@ func (c *Client) do(path string, body, result interface{}) error {
 
 	return json.NewDecoder(resp.Body).Decode(result)
 }
+
+// get sends a GET request to the given API path and decodes the JSON response
+// into result.
+func (c *Client) get(path string, result interface{}) error {
+	req, err := http.NewRequest("GET", c.endpoint(path).String(), nil)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Accept", "application/json")
+	req.Header.Set("X-Postmark-Server-Token", c.ApiKey)
+
+	resp, err := (&http.Client{}).Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	return json.NewDecoder(resp.Body).Decode(result)
+}
